@@ -1,0 +1,372 @@
+/*
+ *  BCParser.h
+ *  1FACH
+ *
+ *  Created by Uli Kusterer on Sun Jul 20 2003.
+ *  Copyright (c) 2009 Gerda the Great. All rights reserved.
+ *
+ */
+
+/* -----------------------------------------------------------------------------
+	Headers:
+   -------------------------------------------------------------------------- */
+
+#include <deque>
+#include <map>
+#include <string>
+#include <stdexcept>
+#include "BCInstruction.h"
+
+
+#ifndef BCPARSER_DEBUG
+#define BCPARSER_DEBUG  0
+#endif
+
+#ifndef BCDEBUG_TOKENIZER
+#define BCDEBUG_TOKENIZER  BCPARSER_DEBUG
+#endif
+
+#if BCPARSER_DEBUG
+#define DEBUG_OUTPUT(n)			printf("%s",n)
+#define DEBUG_OUTPUT2(n,o)		printf(n,o)
+#define DEBUG_OUTPUT3(n,o,p)	printf(n,o,p)
+#define DEBUG_OUTPUT4(n,o,p,q)	printf(n,o,p,q)
+#else
+#define DEBUG_OUTPUT(n)			// (n)
+#define DEBUG_OUTPUT2(n,o)		// (n,o)
+#define DEBUG_OUTPUT3(n,o,p)	// (n,o,p)
+#define DEBUG_OUTPUT4(n,o,p,q)	// (n,o,p,q)
+#endif
+
+
+/* -----------------------------------------------------------------------------
+	BCToken:
+		Constants and struct definition for the data structure used for keeping
+		a list of tokens after tokenizing.
+   -------------------------------------------------------------------------- */
+
+// Possible values for mTokenType/during tokenizing:
+enum BCTokenTypeEnum
+{
+	BCT_WHITESPACE = 0,				// We're currently scanning whitespace. There should never be a token that has this type in BCParser::mTokens. This may be used as an indicator for end-of-list.
+	BCT_NEWLINE,					// A line break of any kind.
+	BCT_IDENTIFIER,					// Any kind of identifier, operator etc.
+	BCT_STRING,						// A double-quoted string constant.
+	BCT_INTEGER,					// An identifier consisting only of numerical digits.
+	BCT_DOUBLE,						// An identifier consisting only of numerical digits and a period.
+};
+
+
+// More readable variant of BCT_WHITESPACE when used as end-of-list indicator:
+#define BCT_INVALID		BCT_WHITESPACE
+
+
+// Possible values for mTokenID:
+//	If you add something here, you must also add it to mIdentifiers in BCParser's constructor.
+enum BCTokenIDEnum
+{
+	BCTI_ARBITRARY = 0,				// Not a specially-recognized token.
+	BCTI_ON,						// "on" for message handlers.
+	BCTI_END,						// "end" for indicating end if, end handler etc.
+	BCTI_IF,						// "if" ... then ...
+	BCTI_THEN,						// if ... "then" ...
+	BCTI_ELSE,						// if ... then ... "else"
+	BCTI_PUT,						// "put" ... into ...
+	BCTI_INTO,						// put ... "into" ...
+	BCTI_PASS,						// "pass" through ...
+	BCTI_THROUGH,					// pass "through" ...
+	BCTI_OPERATOR_PLUS,				// "+"
+	BCTI_OPERATOR_MINUS,			// "-"
+	BCTI_OPERATOR_MULTIPLY,			// "*"
+	BCTI_OPERATOR_DIVIDE,			// "/"
+	BCTI_OPERATOR_LIST_START,		// "["
+	BCTI_OPERATOR_LIST_END,			// "]"
+	BCTI_OPERATOR_IS,				// "is" or "="
+	BCTI_OPERATOR_COMMA,			// ","
+	BCTI_OPERATOR_AMPERSAND,		// "&"
+	BCTI_WITH,						// "with"
+	BCTI_OPERATOR_APOSTROPHE,		// "'" for "object's property"
+	BCTI_OPERATOR_OPEN_BRACKET,		// "("
+	BCTI_OPERATOR_CLOSE_BRACKET,	// ")"
+	BCTI_PROPERTY,					// "property" or "properties"
+	BCTI_OPERATOR_MOD,				// "mod" for remainder of division operator.
+	BCTI_SYSTEM,					// "system" identifier for system-native API calls.
+	BCTI_S,							// "s" for "object's property"
+	BCTI_THE,						// "the" for "the result" and such stuff
+	BCTI_RESULT,					// "result" for "the result"
+	BCTI_NEW,						// "new" as in "new function xy" [FFI]
+	BCTI_FUNCTION,					// "function" as in "new function xy" [FFI]
+	BCTI_IN,						// "in" as in "new function xy in <library>" [FFI]
+	BCTI_RETURNS,					// "in" as in "new function xy returns type" [FFI]
+	BCTI_NOTHING,					// "nothing" as in "new function xy returns nothing" for void functions [FFI]
+	BCTI_INTEGER,					// "integer" as in "new function xy( integer )" for short integers [FFI]
+	BCTI_CHARACTER,					// "character" data type [FFI]
+	BCTI_POINTER,					// "pointer" data type [FFI]
+	BCTI_PASCAL,					// "pascal" data type qualifier [FFI]
+	BCTI_STRING,					// "string" data type [FFI]
+	BCTI_FOUNDATION,				// "foundation" data type qualifier for Macs [FFI]
+	BCTI_UNSIGNED,					// "unsigned" data type qualifier [FFI]
+	BCTI_DECIMAL,					// "decimal" data type qualifier [FFI]
+	BCTI_NUMBER,					// "number" data type [FFI]
+	BCTI_BIG,						// "big" data type qualifier [FFI]
+	BCTI_OPERATOR_NOT,				// binary "is not" operator or unary "not".
+	BCTI_OPERATOR_IS_NOT,			// binary single-character "is not" operator ("=/="), and token type returned for "is not" by ParseBinaryOperator.
+	BCTI_CONTAINER,					// "container" qualifier for pass-by-reference of parameters.
+	BCTI_AS,						// "as" qualifier indicating name for associative array item.
+	BCTI_REPEAT,					// "repeat" identifier used in loops.
+	BCTI_WHILE,						// "while" qualifier used in repeat loops.
+	BCTI_TRUE,						// "true" constant (1).
+	BCTI_FALSE,						// "false" constant (0).
+	BCTI_RETURN,					// "return" constant (ASCII character 13) or "return" command.
+	BCTI_LINEFEED,					// "linefeed" constant (ASCII character 10).
+	BCTI_NULL,						// "null" constant (ASCII character 0).
+	BCTI_TAB,						// "tab" constant (ASCII character 9).
+	BCTI_OPERATOR_GREATER_THAN,		// ">" operator
+	BCTI_OPERATOR_LESS_THAN,		// "<" operator
+};
+
+
+// Character constants (may be platform-specific):
+
+// Unicode 0x0226:
+#define BCC_IS_NOT_SIGN_STR		"≠"
+#define BCC_IS_NOT_SIGN_CHAR	'≠'
+
+// Possible return values for ParseValue:
+enum
+{
+	BCV_NONE,		// Nothing eligible for a value found.
+	BCV_STRING,		// String constant parsed.
+	BCV_INTEGER,	// Integer constant parsed.
+	BCV_DOUBLE,		// Decimal number constant parsed.
+	BCV_LIST,		// Constant list of values parsed.
+	BCV_OBJECT,		// Object descriptor parsed.
+	BCV_DYNAMIC,	// Any non-constant value, like a function result or list entry.
+};
+
+
+/* This is a data structure which we use as a shorthand notation for a token
+	(a "word"). It may seem silly to keep info about a word of four characters
+	in a 16-byte data structure, but since this one is fixed-size, scanning
+	forward and backward is a lot faster, and comparisons usually only involve
+	comparing four bytes instead of an entire string. */
+
+typedef	unsigned int BCTokenType;
+typedef	unsigned int BCTokenID;
+typedef unsigned int BCOffset;
+
+struct BCToken
+{
+	BCTokenType			mTokenType;		// String, number, identifier?
+	BCTokenID			mTokenID;		// Number to identify some tokens we recognize right away.
+	BCOffset			mStartOffs;		// Offset to first char of token in string.
+	BCOffset			mEndOffs;		// Offset to last char of token in string.
+};
+
+
+// Masks for our tokenizer's state machine:
+enum BCTokenState
+{
+	BC_TOKEN_STATE_WHITESPACE		= 0,
+	BC_TOKEN_STATE_IDENTIFIER		= (1 << 0),
+	BC_TOKEN_STATE_STRING			= (1 << 1),
+	BC_TOKEN_STATE_ESCAPE_SEQ		= (1 << 2),		// Only when BC_TOKEN_STATE_STRING is set. 
+	BC_TOKEN_STATE_INTEGER			= (1 << 3),		// Check this *and* BC_TOKEN_STATE_NUMBER. If NUMBER is set and this isn't, it means we already found a decimal point.
+	BC_TOKEN_STATE_NUMBER			= (1 << 4),
+	BC_TOKEN_STATE_COMMENT			= (1 << 5),
+	BC_TOKEN_STATE_BLOCK_COMMENT	= (1 << 6),
+};
+
+
+/* -----------------------------------------------------------------------------
+	Data Types:
+   -------------------------------------------------------------------------- */
+
+class BCSysFcnEntry
+{
+public:
+	std::string			mFunctionSignature;		// Function signature (param and return value types).
+	std::string			mFunctionNameLib;		// Name of function and library.
+	
+public:
+	BCSysFcnEntry()								{};
+	BCSysFcnEntry( const BCSysFcnEntry* sfe )	{ mFunctionSignature.assign( sfe->mFunctionSignature ); mFunctionNameLib.assign( sfe->mFunctionNameLib ); };
+	BCSysFcnEntry( const BCSysFcnEntry& sfe )	{ mFunctionSignature.assign( sfe.mFunctionSignature ); mFunctionNameLib.assign( sfe.mFunctionNameLib ); };
+	BCSysFcnEntry( const std::string& sig, const std::string& nm ) : mFunctionSignature(sig), mFunctionNameLib(nm)	{};
+	BCSysFcnEntry( const char* sig, const char* nm ) : mFunctionSignature(sig), mFunctionNameLib(nm)				{};
+
+	BCSysFcnEntry&			operator =( const BCSysFcnEntry& e ) { mFunctionSignature.assign( e.mFunctionSignature ); mFunctionNameLib.assign( e.mFunctionNameLib ); return *this; };
+	//const BCSysFcnEntry&	operator =( const BCSysFcnEntry& e ) { mFunctionSignature.assign( e.mFunctionSignature ); mFunctionNameLib.assign( e.mFunctionNameLib ); return *this; };
+};
+
+class BCClassEntry
+{
+public:
+	std::string							mClassName;			// Name of this class.
+	BCClassEntry*						mSuperclass;		// Superclass of this class, NULL if none.
+	unsigned int						mSuperclassCount;	// Number of classes we inherit stuff from.
+	std::map<std::string,unsigned int>	mInstanceVars;		// Variable name --> slot offset mappings.
+
+public:
+	BCClassEntry()										{};
+	BCClassEntry( std::string nm, BCClassEntry* su ) : mClassName(nm), mSuperclass(su)		{ CalcSuperclassCount(); };
+	BCClassEntry( const BCClassEntry* tm )													{ mClassName.assign( tm->mClassName ); mSuperclass = tm->mSuperclass; mSuperclassCount = tm->mSuperclassCount; mInstanceVars = tm->mInstanceVars; };
+	BCClassEntry( const BCClassEntry& tm )													{ mClassName.assign( tm.mClassName ); mSuperclass = tm.mSuperclass; mSuperclassCount = tm.mSuperclassCount; mInstanceVars = tm.mInstanceVars; };
+
+protected:
+	void		CalcSuperclassCount()		{ if( !mSuperclass ) { mSuperclassCount = 0; return; } mSuperclassCount = mSuperclass->mSuperclassCount +1; };
+};
+
+typedef std::deque<BCToken>					BCTokenList;			// A list of BCToken objects.
+typedef std::deque<BCInstruction>			BCInstructionList;		// A list of BCInstruction structs.
+typedef std::map<std::string,BCTokenID>		BCIdentifierIDMap;		// Mapping from identifier names to their token IDs. Used by the tokenizer.
+typedef std::map<BCTokenID,BCUInt32>		BCOperatorInstrMap;		// Mapping from a certain operator's token ID to the associated instruction ID. Note that some operators may actually consist of several tokens, in which case the token ID is a "virtual" ID that represents *both* tokens or an equivalent token's ID.
+typedef std::map<BCUInt32,int>				BCOpPrecedenceMap;		// Mapping from a particular operator's instruction ID to an operator precedence value, to decide which operation in an expression will be executed first.
+typedef std::map<std::string,BCSysFcnEntry>	BCSystemFunctionMap;	// Mapping from system function name to its signature.
+typedef std::map<std::string,BCClassEntry>	BCClassMap;				// Mapping from class names to type information.
+typedef std::map<std::string,int>			BCVarNameToIndexMap;	// Mapping from local var to its stack index.
+typedef std::map<std::string,BCUInt32>		BCConstantStringsMap;	// Look-up table that allows re-using string constant instructions. AddStringInstruction() adds all strings it creates to this, and whenever a string is requested it returns an existing entry from this table, where possible.
+typedef std::map<BCTokenID,BCUInt32>		BCIntegerConstMap;		// Register all integral constants with this.
+typedef std::map<BCTokenID,std::string>		BCStringConstMap;		// Register all built-in string or character constants with this.
+
+
+/* -----------------------------------------------------------------------------
+	Exceptions:
+		These are a couple of exception objects that are thrown when an error
+		occurs.
+   -------------------------------------------------------------------------- */
+
+// Couldn't create a file:
+class	BCCreateFileError : public std::runtime_error
+{
+public:
+	BCCreateFileError( const std::string name ) : std::runtime_error(name) {};
+	
+	virtual const char* what() const throw()
+	{
+		static char		vMsg[512];
+		
+		snprintf( vMsg, sizeof(vMsg), "Can't create file \"%s\".", std::runtime_error::what() );
+		
+		return vMsg;
+	};
+};
+
+
+// Couldn't write to a file:
+class	BCWriteFileError : public std::runtime_error
+{
+public:
+	BCWriteFileError( const std::string name ) : std::runtime_error(name) {};
+};
+
+
+// Syntax error or something like that in the parser:
+class	BCParserError : public std::runtime_error
+{
+	unsigned int		mOffset;		// Offset into the text where the error occurred.
+
+public:
+	BCParserError( const std::string name, unsigned int offs = 0 ) : std::runtime_error(name) { mOffset = offs; };
+	
+	virtual const char* what() const throw()
+	{
+		static char		vMsg[512];
+		
+		snprintf( vMsg, sizeof(vMsg), "%s (offset %u).", std::runtime_error::what(), mOffset );
+		
+		return vMsg;
+	};
+};
+
+
+/* -----------------------------------------------------------------------------
+	BCParser:
+		The parser class. This is an object which can be used to turn text into
+		instructions by tokenizing and parsing the text. There are also some
+		methods that allow adding certain instructions to the code (e.g. if you
+		just want to evaluate an expression and print its result to the
+		console), and some methods that allow saving code to disk.
+   -------------------------------------------------------------------------- */
+
+class   BCParser
+{
+protected:
+	BCTokenList					mTokens;			// List of tokens (after Tokenize() has been called).
+	BCInstructionList  			mCode;				// Code (after Parse() has been called).
+	char*						mText;				// Text being tokenized/parsed (only until parsing is complete)
+	bool						mCompileForDebug;   // Generate instructions that aid in source-level debugging?
+	std::string					mCurrentFilename;   // Name of current source file.
+	BCConstantStringsMap		mConstantStrings;   // String constant -> String instruction index mappings used by AddStringInstruction to allow re-use.
+	static BCIdentifierIDMap	sIdentifiers;		// List of identifiers (after construction).
+	static BCOperatorInstrMap   sOperatorInstrs;	// Mappings from operator token ID to instruction type.
+	static BCOpPrecedenceMap	sOpPrecedences;		// Mappings from operator instruction type to operator precedence (higher means gets the left argument).
+	static BCSystemFunctionMap	sSystemFunctions;	// Mappings from system function name to signature.
+	static BCClassMap			sClasses;			// Information about the different classes we've seen so far.
+	static BCUInt32				sObjectIDSeed;		// Number for a new object's ID. If you use it, add one to it so the next user gets a fresh one.
+	static BCIntegerConstMap	sIntegralConstants; // Mappings from token type for a constant to its integer value.
+	static BCStringConstMap		sStringConstants;   // Mappings from token type for a constant to its integral value.
+	
+public:
+	BCParser();
+	
+	void			SetCurrentFilename( const std::string& s)		{ mCurrentFilename.assign( s ); };  // File path where the debugger should look for this source file.
+	
+	void			Tokenize( const char* inText, size_t len );		// Call this first, and hand it your text to be parsed. The text needn't be zero-terminated, and length shouldn't include any terminating zero bytes if you add them. You mustn't dispose of the text until it's been parsed.
+	void			ClearTokens()									{ mTokens.clear(); };
+	
+	void			Parse();										// Call this or ParseMethodBody second.
+	void			ParseMethodBody( BCTokenList::iterator& itty, BCUInt32* numParams, BCVarNameToIndexMap& vNameToIndex, BCToken* stopTokens = NULL );
+	void			ParseMethodBody( BCUInt32* numParams, BCVarNameToIndexMap& vNameToIndex );
+	void			ParseHeaderFile();
+	
+	void			AddEndInstruction();				// Mark end of code block.
+	void			AddPrintResultInstructions();		// Adds a "print" instruction that outputs the variable "the result". Useful if you want to generate code using ParseMethodBody() that outputs the result instead of just leaving it on the stack to rot.
+	void			AddPrintInstruction();
+	
+	void			PrintAllTokens();
+	void			PrintCode( std::ostream& outs );	// Prints the code in human-readable form to the specified stream.
+	void			SaveToFile( const char* fpath );	// Saves raw code (without instances).
+	
+	void			SetCompileForDebug( bool n )		{ mCompileForDebug = n; };
+	
+	static void		InitLookupTables();					// Called by the first BCParser's constructor automatically.
+	
+protected:
+	void			EndToken( std::string& ioCurrTokenStr, BCToken* ioCurrToken, unsigned int inNewStart );
+	void			ParseObject( BCTokenList::iterator& itty );
+	void			ParseExpression( BCTokenList::iterator& itty, BCUInt32* numParams, BCVarNameToIndexMap& vNameToIndex );
+	unsigned int	ParseBinaryOperator( BCTokenList::iterator& itty );
+	unsigned int	ParseValue( BCTokenList::iterator& itty, BCUInt32* numParams, BCVarNameToIndexMap& vNameToIndex, bool needContainer = false );
+	bool			ParseMethod( BCTokenList::iterator& itty );
+	BCUInt32*		AddPushLocalVarsInstruction( int numVars );
+	BCUInt32		AddStringInstruction( std::string& str, bool addPushInstr = true );
+	void			AddDebugInstructions( BCTokenList::iterator& itty );
+	void			AppendInstruction( BCInstruction& instr );
+	char			TokensToTypeChar( BCTokenList::iterator& itty );
+	void			TokenizeOneWhitespaceChar( size_t x, std::string& vCurrTokenStr, unsigned *ioTokenState,
+												BCToken* vCurrToken );
+	void			TokenizeOneStringChar( size_t x, std::string& vCurrTokenStr, unsigned *ioTokenState,
+											BCToken* vCurrToken );
+	bool			IsOperatorChar( char c );
+	void			TokenizeOneNewlineChar( size_t x, std::string& vCurrTokenStr,
+												unsigned *ioTokenState,
+												BCToken* vCurrToken );
+	void			TokenizeOneOperatorChar( size_t x, std::string& vCurrTokenStr,
+												unsigned *ioTokenState,
+												BCToken* vCurrToken );
+	void			TokenizeOneIdentifierChar( size_t x, std::string& vCurrTokenStr,
+												unsigned *ioTokenState,
+												BCToken* vCurrToken );
+	void			TokenizeOneNumberChar( size_t x, std::deque& vCurrTokenStr,
+												unsigned *ioTokenState,
+												BCToken* vCurrToken );
+	void			TokenizeOneCommentChar( size_t x, std::deque& vCurrTokenStr,
+											unsigned *ioTokenState,
+											BCToken* vCurrToken );
+											//additional line for testing.
+	void			TokenizeOneBlockCommentChar( size_t x, std::deque& vCurrTokenStr,
+											unsigned *ioTokenState,
+											BCToken* vCurrToken );
+	void			AppendEscapedCharsFor( char escapeSequence, std::string& vCurrTokenStr );
+};

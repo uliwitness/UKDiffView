@@ -1,0 +1,65 @@
+--- /Users/uli/Programming/AngelDiff/Testfile1.txt	2004-01-03 00:19:05.000000000 +0100
++++ /Users/uli/Programming/AngelDiff/Testfile2.txt	2008-08-02 12:34:16.000000000 +0200
+@@ -3,7 +3,7 @@
+  *  1FACH
+  *
+  *  Created by Uli Kusterer on Sun Jul 20 2003.
+- *  Copyright (c) 2003 M. Uli Kusterer. All rights reserved.
++ *  Copyright (c) 2009 Gerda the Great. All rights reserved.
+  *
+  */
+ 
+@@ -291,22 +291,6 @@
+ 
+ class   BCParser
+ {
+-protected:
+-	BCTokenList					mTokens;			// List of tokens (after Tokenize() has been called).
+-	BCInstructionList  			mCode;				// Code (after Parse() has been called).
+-	char*						mText;				// Text being tokenized/parsed (only until parsing is complete)
+-	bool						mCompileForDebug;   // Generate instructions that aid in source-level debugging?
+-	std::string					mCurrentFilename;   // Name of current source file.
+-	BCConstantStringsMap		mConstantStrings;   // String constant -> String instruction index mappings used by AddStringInstruction to allow re-use.
+-	static BCIdentifierIDMap	sIdentifiers;		// List of identifiers (after construction).
+-	static BCOperatorInstrMap   sOperatorInstrs;	// Mappings from operator token ID to instruction type.
+-	static BCOpPrecedenceMap	sOpPrecedences;		// Mappings from operator instruction type to operator precedence (higher means gets the left argument).
+-	static BCSystemFunctionMap	sSystemFunctions;	// Mappings from system function name to signature.
+-	static BCClassMap			sClasses;			// Information about the different classes we've seen so far.
+-	static BCUInt32				sObjectIDSeed;		// Number for a new object's ID. If you use it, add one to it so the next user gets a fresh one.
+-	static BCIntegerConstMap	sIntegralConstants; // Mappings from token type for a constant to its integer value.
+-	static BCStringConstMap		sStringConstants;   // Mappings from token type for a constant to its integral value.
+-	
+ public:
+ 	BCParser();
+ 	
+@@ -346,6 +330,8 @@
+ 	char			TokensToTypeChar( BCTokenList::iterator& itty );
+ 	void			TokenizeOneWhitespaceChar( size_t x, std::string& vCurrTokenStr, unsigned *ioTokenState,
+ 												BCToken* vCurrToken );
++	void			TokenizeOneStringChar( size_t x, std::string& vCurrTokenStr, unsigned *ioTokenState,
++											BCToken* vCurrToken );
+ 	bool			IsOperatorChar( char c );
+ 	void			TokenizeOneNewlineChar( size_t x, std::string& vCurrTokenStr,
+ 												unsigned *ioTokenState,
+@@ -356,16 +342,15 @@
+ 	void			TokenizeOneIdentifierChar( size_t x, std::string& vCurrTokenStr,
+ 												unsigned *ioTokenState,
+ 												BCToken* vCurrToken );
+-	void			TokenizeOneNumberChar( size_t x, std::string& vCurrTokenStr,
++	void			TokenizeOneNumberChar( size_t x, std::deque& vCurrTokenStr,
+ 												unsigned *ioTokenState,
+ 												BCToken* vCurrToken );
+-	void			TokenizeOneCommentChar( size_t x, std::string& vCurrTokenStr,
++	void			TokenizeOneCommentChar( size_t x, std::deque& vCurrTokenStr,
+ 											unsigned *ioTokenState,
+ 											BCToken* vCurrToken );
+-	void			TokenizeOneBlockCommentChar( size_t x, std::string& vCurrTokenStr,
++											//additional line for testing.
++	void			TokenizeOneBlockCommentChar( size_t x, std::deque& vCurrTokenStr,
+ 											unsigned *ioTokenState,
+ 											BCToken* vCurrToken );
+ 	void			AppendEscapedCharsFor( char escapeSequence, std::string& vCurrTokenStr );
+-	void			TokenizeOneStringChar( size_t x, std::string& vCurrTokenStr, unsigned *ioTokenState,
+-											BCToken* vCurrToken );
+ };
+\ No newline at end of file

@@ -1,0 +1,40 @@
+6c6
+<  *  Copyright (c) 2003 M. Uli Kusterer. All rights reserved.
+---
+>  *  Copyright (c) 2009 Gerda the Great. All rights reserved.
+294,309d293
+< protected:
+< 	BCTokenList					mTokens;			// List of tokens (after Tokenize() has been called).
+< 	BCInstructionList  			mCode;				// Code (after Parse() has been called).
+< 	char*						mText;				// Text being tokenized/parsed (only until parsing is complete)
+< 	bool						mCompileForDebug;   // Generate instructions that aid in source-level debugging?
+< 	std::string					mCurrentFilename;   // Name of current source file.
+< 	BCConstantStringsMap		mConstantStrings;   // String constant -> String instruction index mappings used by AddStringInstruction to allow re-use.
+< 	static BCIdentifierIDMap	sIdentifiers;		// List of identifiers (after construction).
+< 	static BCOperatorInstrMap   sOperatorInstrs;	// Mappings from operator token ID to instruction type.
+< 	static BCOpPrecedenceMap	sOpPrecedences;		// Mappings from operator instruction type to operator precedence (higher means gets the left argument).
+< 	static BCSystemFunctionMap	sSystemFunctions;	// Mappings from system function name to signature.
+< 	static BCClassMap			sClasses;			// Information about the different classes we've seen so far.
+< 	static BCUInt32				sObjectIDSeed;		// Number for a new object's ID. If you use it, add one to it so the next user gets a fresh one.
+< 	static BCIntegerConstMap	sIntegralConstants; // Mappings from token type for a constant to its integer value.
+< 	static BCStringConstMap		sStringConstants;   // Mappings from token type for a constant to its integral value.
+< 	
+348a333,334
+> 	void			TokenizeOneStringChar( size_t x, std::string& vCurrTokenStr, unsigned *ioTokenState,
+> 											BCToken* vCurrToken );
+359c345
+< 	void			TokenizeOneNumberChar( size_t x, std::string& vCurrTokenStr,
+---
+> 	void			TokenizeOneNumberChar( size_t x, std::deque& vCurrTokenStr,
+362c348
+< 	void			TokenizeOneCommentChar( size_t x, std::string& vCurrTokenStr,
+---
+> 	void			TokenizeOneCommentChar( size_t x, std::deque& vCurrTokenStr,
+365c351,352
+< 	void			TokenizeOneBlockCommentChar( size_t x, std::string& vCurrTokenStr,
+---
+> 											//additional line for testing.
+> 	void			TokenizeOneBlockCommentChar( size_t x, std::deque& vCurrTokenStr,
+369,370d355
+< 	void			TokenizeOneStringChar( size_t x, std::string& vCurrTokenStr, unsigned *ioTokenState,
+< 											BCToken* vCurrToken );
