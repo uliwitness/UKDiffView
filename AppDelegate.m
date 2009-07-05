@@ -25,6 +25,7 @@
 
 - (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename
 {
+#pragma unused(sender)
 	self.currPath = [[filename stringByDeletingPathExtension] stringByAppendingPathExtension: @"txt"];
 	NSString*	stringOne = [NSString stringWithContentsOfFile: self.currPath];
 	NSString*	diffPath = [[filename stringByDeletingPathExtension] stringByAppendingPathExtension: @"udiff"];
@@ -55,6 +56,8 @@
 
 -(void)	exportMerged: (id)sender
 {
+#pragma unused(sender)
+
 	NSString*	merged = [[diffView diffParser] mergedString];
 	[merged writeToFile: [[currPath stringByDeletingPathExtension] stringByAppendingPathExtension: @"merged.txt"] atomically: NO encoding: NSUTF8StringEncoding error: nil];
 }

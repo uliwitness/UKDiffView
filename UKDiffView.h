@@ -56,3 +56,11 @@
 -(void)				updateDrawingCacheCompletely: (BOOL)recreate;
 
 @end
+
+// Layout utility functions
+NSRect	UKBoxAroundPoint( NSPoint pos, CGFloat dist );
+NSPoint	UKTopLeft( NSRect box );
+NSPoint	UKTopRight( NSRect box );
+NSPoint	UKBottomLeft( NSRect box );
+NSPoint	UKBottomRight( NSRect box );
+NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y );

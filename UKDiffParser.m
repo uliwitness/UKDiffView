@@ -513,14 +513,14 @@
 		else	// Change or delete:
 		{
 			// Capture old text and add it to this diff item:
-			NSMutableString*	currStr = [NSMutableString string];
+			NSMutableString*	replicatedString = [NSMutableString string];
 			while( (originalRange.location +originalRange.length) > currOriginalLine )
 			{
 				NSString*	theLine = [originalLines objectAtIndex: currOriginalLine++];
-				[currStr appendString: theLine];
+				[replicatedString appendString: theLine];
 			}
 			
-			[currDiff setOldText: currStr];
+			[currDiff setOldText: replicatedString];
 			[newDifferences addObject: currDiff];
 		}
 	}

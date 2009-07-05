@@ -19,11 +19,11 @@
 //	Constants:
 // -----------------------------------------------------------------------------
 
-#define	ROUNDING_SIZE		2.0
-#define SIDE_MARGIN			3.0
-#define HORZ_MARGIN			8.0
-#define VERT_MARGIN			4.0
-#define DIVIDER_WIDTH		16.0
+#define	ROUNDING_SIZE		(2.0f)
+#define SIDE_MARGIN			(3.0f)
+#define HORZ_MARGIN			(8.0f)
+#define VERT_MARGIN			(4.0f)
+#define DIVIDER_WIDTH		(16.0f)
 
 
 // -----------------------------------------------------------------------------
@@ -180,9 +180,8 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 	
 	NSBezierPath*	thePath = [NSBezierPath bezierPath];
 	NSRect			topLeft, topRight, botRight, botLeft;
-	CGFloat			leftRounding = (leftBox.size.height >= ROUNDING_SIZE) ? ROUNDING_SIZE : 0.0,
-					rightRounding = (rightBox.size.height >= ROUNDING_SIZE) ? ROUNDING_SIZE : 0.0;
-	
+	CGFloat			leftRounding = (leftBox.size.height >= ROUNDING_SIZE) ? ROUNDING_SIZE : 0.0f,
+					rightRounding = (rightBox.size.height >= ROUNDING_SIZE) ? ROUNDING_SIZE : 0.0f;
 	
 	topLeft = UKBoxAroundPoint(UKTopLeft(leftBox), leftRounding );
 	topRight = UKBoxAroundPoint(UKTopRight(rightBox), rightRounding );
@@ -192,35 +191,35 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 	[thePath moveToPoint: UKBottomLeft(topLeft)];
 	[thePath appendBezierPathWithArcWithCenter: UKBottomRight(topLeft)
 					radius: topLeft.size.height
-					startAngle: 180.0
-					endAngle: 270.0
+					startAngle: 180.0f
+					endAngle: 270.0f
 					clockwise: NO];
 	[thePath lineToPoint: UKOffsetPoint(UKTopRight(leftBox), 0, -leftRounding)];
 	[thePath lineToPoint: UKOffsetPoint(UKTopLeft(rightBox), 0, -rightRounding)];
 	[thePath lineToPoint: UKTopLeft(topRight)];
 	[thePath appendBezierPathWithArcWithCenter: UKBottomLeft(topRight)
 				radius: topRight.size.height
-				startAngle: 270.0
-				endAngle: 0.0
+				startAngle: 270.0f
+				endAngle: 0.0f
 				clockwise: NO];
 	[thePath lineToPoint: UKOffsetPoint(UKTopRight(botRight), 0, rightRounding)];
 	[thePath appendBezierPathWithArcWithCenter: UKTopLeft(botRight)
 				radius: botRight.size.height
-				startAngle: 0.0
-				endAngle: 90.0
+				startAngle: 0.0f
+				endAngle: 90.0f
 				clockwise: NO];
 	[thePath lineToPoint: UKOffsetPoint(UKBottomLeft(rightBox), 0, rightRounding)];
 	[thePath lineToPoint: UKOffsetPoint(UKBottomRight(leftBox), 0, leftRounding)];
 	[thePath lineToPoint: UKBottomRight(botLeft)];
 	[thePath appendBezierPathWithArcWithCenter: UKTopRight(botLeft)
 				radius: botLeft.size.height
-				startAngle: 90.0
-				endAngle: 180.0
+				startAngle: 90.0f
+				endAngle: 180.0f
 				clockwise: NO];
 	[thePath closePath];
 	
 	NSAffineTransform*	trans = [NSAffineTransform transform];
-	[trans translateXBy: 0.5 yBy: 0.5];
+	[trans translateXBy: 0.5f yBy: 0.5f];
 	[thePath transformUsingAffineTransform: trans];
 	
 	return thePath;
@@ -246,7 +245,7 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 			mainColor = [NSColor greenColor];
 			leftDrawBox.size.height = 0;
 		}
-		fillColor = [mainColor colorWithAlphaComponent: 0.1];
+		fillColor = [mainColor colorWithAlphaComponent: 0.1f];
 		
 		NSBezierPath*	thePath = [self pathWithConnectedBox: leftDrawBox toBox: rightDrawBox];
 		
@@ -255,12 +254,12 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 		if( selState )
 		{
 			[mainColor setStroke];
-			[thePath setLineWidth: 2.0];
+			[thePath setLineWidth: 2.0f];
 		}
 		else
 		{
 			[fillColor setStroke];
-			[thePath setLineWidth: 1.0];
+			[thePath setLineWidth: 1.0f];
 		}
 		[thePath stroke];
 		
@@ -273,7 +272,7 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 		if( !sChooseRightImg )
 			sChooseRightImg = [NSImage imageNamed: @"UKDiffViewChooseRight"];
 		NSImage*		img = apply ? sChooseRightImg : sChooseLeftImg;
-		[img drawAtPoint: UKTopRight(leftDrawBox) fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0];
+		[img drawAtPoint: UKTopRight(leftDrawBox) fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0f];
 	}
 	
 	NSLayoutManager*	layoutManager = [[leftTextStorage layoutManagers] objectAtIndex: 0];
@@ -378,8 +377,10 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 }
 
 
-- (void)moveRight:(id)sender
+-(void)	moveRight: (id)sender
 {
+#pragma unused(sender)
+
 	if( selectedRow >= 0 )
 	{
 		UKDiffEntry*	currEntry = [diffParser entryAtIndex: selectedRow];
@@ -391,8 +392,10 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 }
 
 
-- (void)moveLeft:(id)sender
+-(void)	moveLeft: (id)sender
 {
+#pragma unused(sender)
+
 	if( selectedRow >= 0 )
 	{
 		UKDiffEntry*	currEntry = [diffParser entryAtIndex: selectedRow];
@@ -404,8 +407,10 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 }
 
 
-- (void)moveUp:(id)sender
+-(void)	moveUp: (id)sender
 {
+#pragma unused(sender)
+
 	NSInteger	x = selectedRow -1;
 	
 	for( ; x >= 0; x-- )
@@ -423,8 +428,10 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 }
 
 
--(void)	moveDown:(id)sender
+-(void)	moveDown: (id)sender
 {
+#pragma unused(sender)
+
 	NSInteger	x = selectedRow +1,
 				count = [cachedDrawings count];
 	
@@ -481,7 +488,7 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 -(void) updateDrawingCacheCompletely: (BOOL)recreate
 {
 	NSDictionary*	attrs = [NSDictionary dictionaryWithObjectsAndKeys:
-								[NSFont userFixedPitchFontOfSize: 10.0], NSFontAttributeName,
+								[NSFont userFixedPitchFontOfSize: 10.0f], NSFontAttributeName,
 								nil];
 	NSUInteger		x = 0,
 					count = [diffParser count];
