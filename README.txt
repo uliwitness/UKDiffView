@@ -3,6 +3,27 @@ UKDIFFVIEW
 
 A simple NSView subclass that takes an original file and a text-form diff and displays it in a graphical form, and can selectively apply the modifications it contains.
 
+This currently handles regular diffs, like:
+
+6c6
+< foo
+---
+> bar
+
+and diffs in unified diff format, like:
+
+--- /path/to/file1.txt	2004-01-03 00:12:34.000000000 +0100
++++ /path/to/file2.txt	2008-08-02 12:34:56.000000000 +0200
+@@ -3,7 +3,7 @@
+context
+context
+context
+- foo
++ bar
+context
+context
+
+
 IMPORTANT
 ---------
 
