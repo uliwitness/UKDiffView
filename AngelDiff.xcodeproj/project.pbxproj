@@ -10,6 +10,7 @@
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
 		3D94A55A147A747200DDA4AA /* JRSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D94A559147A747200DDA4AA /* JRSwizzle.m */; };
 		3D94A728147AC19500DDA4AA /* NSString+AutodetectTextEncoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D94A727147AC19500DDA4AA /* NSString+AutodetectTextEncoding.m */; };
+		3D94A801147AD5CA00DDA4AA /* NSView+ScrollToRect.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D94A800147AD5CA00DDA4AA /* NSView+ScrollToRect.m */; };
 		553744150E4430ED00B1011D /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 553744140E4430ED00B1011D /* AppDelegate.m */; };
 		5537441B0E4431B600B1011D /* UKDiffParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 5537441A0E4431B600B1011D /* UKDiffParser.m */; };
 		553744DF0E44637F00B1011D /* UKDiffView.m in Sources */ = {isa = PBXBuildFile; fileRef = 553744DE0E44637F00B1011D /* UKDiffView.m */; };
@@ -35,6 +36,8 @@
 		3D94A559147A747200DDA4AA /* JRSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JRSwizzle.m; path = jrswizzle/JRSwizzle.m; sourceTree = "<group>"; };
 		3D94A726147AC19500DDA4AA /* NSString+AutodetectTextEncoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+AutodetectTextEncoding.h"; sourceTree = "<group>"; };
 		3D94A727147AC19500DDA4AA /* NSString+AutodetectTextEncoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+AutodetectTextEncoding.m"; sourceTree = "<group>"; };
+		3D94A7FF147AD5CA00DDA4AA /* NSView+ScrollToRect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSView+ScrollToRect.h"; sourceTree = "<group>"; };
+		3D94A800147AD5CA00DDA4AA /* NSView+ScrollToRect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSView+ScrollToRect.m"; sourceTree = "<group>"; };
 		5508EC040E4E5E1A00740CF8 /* Testfile1.udiff */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Testfile1.udiff; sourceTree = "<group>"; };
 		553744130E4430ED00B1011D /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		553744140E4430ED00B1011D /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -77,6 +80,8 @@
 				5537441A0E4431B600B1011D /* UKDiffParser.m */,
 				3D94A726147AC19500DDA4AA /* NSString+AutodetectTextEncoding.h */,
 				3D94A727147AC19500DDA4AA /* NSString+AutodetectTextEncoding.m */,
+				3D94A7FF147AD5CA00DDA4AA /* NSView+ScrollToRect.h */,
+				3D94A800147AD5CA00DDA4AA /* NSView+ScrollToRect.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -246,6 +251,7 @@
 				553748F80E48E38200B1011D /* UKObjectLogger.m in Sources */,
 				3D94A55A147A747200DDA4AA /* JRSwizzle.m in Sources */,
 				3D94A728147AC19500DDA4AA /* NSString+AutodetectTextEncoding.m in Sources */,
+				3D94A801147AD5CA00DDA4AA /* NSView+ScrollToRect.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

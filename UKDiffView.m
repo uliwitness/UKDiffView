@@ -33,6 +33,8 @@
 #import "UKDiffParser.h"
 #import "UKHelperMacros.h"
 
+#import "NSView+ScrollToRect.h"
+
 
 // -----------------------------------------------------------------------------
 //	Constants:
@@ -432,6 +434,8 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 }
 
 
+#define POSITION_RELATIVE_TO_WINDOW_HEIGHT	0.1f
+
 -(void)	moveUp: (id)sender
 {
 #pragma unused(sender)
@@ -445,8 +449,7 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 		{
 			selectedRow = x;
 			[self setNeedsDisplay: YES];
-			[self scrollRectToVisible: [currEntry leftDrawBox]];
-			[self scrollRectToVisible: [currEntry rightDrawBox]];
+			[self scrollRectToTop:NSUnionRect([currEntry leftDrawBox], [currEntry rightDrawBox]) withOffset:POSITION_RELATIVE_TO_WINDOW_HEIGHT];
 			break;
 		}
 	}
@@ -467,13 +470,14 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 		{
 			selectedRow = x;
 			[self setNeedsDisplay: YES];
-			[self scrollRectToVisible: [currEntry leftDrawBox]];
-			[self scrollRectToVisible: [currEntry rightDrawBox]];
+			
+			[self scrollRectToTop:NSUnionRect([currEntry leftDrawBox], [currEntry rightDrawBox]) withOffset:POSITION_RELATIVE_TO_WINDOW_HEIGHT];
 			break;
 		}
 	}
 }
 
+#undef POSITION_RELATIVE_TO_WINDOW_HEIGHT
 
 -(BOOL)	acceptsFirstResponder
 {
