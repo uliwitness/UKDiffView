@@ -53,7 +53,6 @@
 
 @implementation UKCachedDiffEntry
 
-@synthesize leftDrawBox;
 @synthesize rightDrawBox;
 @synthesize leftTextStorage;
 @synthesize rightTextStorage;
@@ -110,6 +109,10 @@
 static CGFloat sOneLineHeight = -1;
 
 
+-(NSRect)leftDrawBox {
+    return leftDrawBox;
+}
+
 -(void)	setLeftDrawBox: (NSRect)box
 {
 	if( sOneLineHeight < 0 )
@@ -124,11 +127,15 @@ static CGFloat sOneLineHeight = -1;
 	NSLayoutManager*	layoutManager = [[leftTextStorage layoutManagers] objectAtIndex: 0];
 	NSTextContainer*	textContainer = [[layoutManager textContainers] objectAtIndex: 0];
 	[textContainer setContainerSize: NSMakeSize(box.size.width, FLT_MAX)];
-	(NSRange) [layoutManager glyphRangeForTextContainer: textContainer]; // Cause re-layout.
+	/*(NSRange) */[layoutManager glyphRangeForTextContainer: textContainer]; // Cause re-layout.
 	NSRect	textRect = [layoutManager usedRectForTextContainer: textContainer];
 	leftDrawBox.size.height = textRect.size.height -(endsInLineBreak ? sOneLineHeight : 0);
 }
 
+
+-(NSRect)rightDrawBox {
+    return rightDrawBox;
+}
 
 -(void)	setRightDrawBox: (NSRect)box
 {
@@ -144,7 +151,7 @@ static CGFloat sOneLineHeight = -1;
 	NSLayoutManager*	layoutManager = [[rightTextStorage layoutManagers] objectAtIndex: 0];
 	NSTextContainer*	textContainer = [[layoutManager textContainers] objectAtIndex: 0];
 	[textContainer setContainerSize: NSMakeSize(box.size.width, FLT_MAX)];
-	(NSRange) [layoutManager glyphRangeForTextContainer: textContainer]; // Cause re-layout.
+	/*(NSRange) */[layoutManager glyphRangeForTextContainer: textContainer]; // Cause re-layout.
 	NSRect	textRect = [layoutManager usedRectForTextContainer: textContainer];
 	rightDrawBox.size.height = textRect.size.height -(endsInLineBreak ? sOneLineHeight : 0);
 }
@@ -315,7 +322,6 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 
 @implementation UKDiffView
 
-@synthesize diffParser;
 @synthesize cachedDrawings;
 @synthesize selectedRow;
 
@@ -486,6 +492,10 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 	return YES;
 }
 
+
+- (UKDiffParser *)diffParser {
+    return [[diffParser retain] autorelease];
+}
 
 -(void)	setDiffParser: (UKDiffParser*)dp
 {
