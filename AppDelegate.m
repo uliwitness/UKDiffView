@@ -30,6 +30,8 @@
 #import "UKDiffView.h"
 #import "UKHelperMacros.h"
 
+#import "NSString+AutodetectTextEncoding.h"
+
 
 @implementation AppDelegate
 
@@ -49,11 +51,15 @@
 	NSStringEncoding enc;
 	
 	self.currPath = [[filename stringByDeletingPathExtension] stringByAppendingPathExtension: @"txt"];
-	NSString*	stringOne = [NSString stringWithContentsOfFile: self.currPath usedEncoding: &enc error: &error];
-	if (!stringOne)
+	NSData*	dataOne = [NSData dataWithContentsOfFile:self.currPath options: 0 error: &error];
+	if (!dataOne)
 	{
 		NSLog(@"%@", error);
+		return NO;
 	}	
+	
+	NSString*	stringOne = [[NSString alloc] initWithData:dataOne autodetectedEncoding:&enc];
+	NSLog(@"txt Encoding: %@", [NSString localizedNameOfStringEncoding:enc]);
 	
 	NSString*	diffPath = [[filename stringByDeletingPathExtension] stringByAppendingPathExtension: @"udiff"];
 	BOOL		uniDiff = YES;
@@ -62,11 +68,16 @@
 		diffPath = [[filename stringByDeletingPathExtension] stringByAppendingPathExtension: @"diff"];
 		uniDiff = NO;
 	}
-	NSString*	differences = [NSString stringWithContentsOfFile: diffPath usedEncoding: &enc error: &error];
-	if (!differences)
+	
+	NSData*	differencesData = [NSData dataWithContentsOfFile:diffPath options: 0 error: &error];
+	if (!differencesData)
 	{
 		NSLog(@"%@", error);
+		return NO;
 	}	
+	
+	NSString*	differences = [[NSString alloc] initWithData:differencesData autodetectedEncoding:&enc];
+	NSLog(@"(u)diff Encoding: %@", [NSString localizedNameOfStringEncoding:enc]);
 	
 	UKDiffParser*	dp = nil;
 	if( uniDiff )
