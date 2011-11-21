@@ -40,10 +40,10 @@
 
 enum
 {
-	UKDiffOperationChange = 'c',	// newText replaces oldText.
-	UKDiffOperationDelete = 'd',	// oldText or nothing.
-	UKDiffOperationAdd = 'a',		// nothing or newText.
-	UKDiffOperationUnchanged = 0	// oldText and newText are the same. destinationRange is unset.
+	UKDiffOperationChange = 'c',	// theNewText replaces theOldText.
+	UKDiffOperationDelete = 'd',	// theOldText or nothing.
+	UKDiffOperationAdd = 'a',		// nothing or theNewText.
+	UKDiffOperationUnchanged = 0	// theOldText and theNewText are the same. destinationRange is unset.
 };
 typedef unichar	UKDiffOperation;
 
@@ -91,16 +91,16 @@ typedef unichar	UKDiffOperation;
 	UKDiffOperation	operation;
 	NSRange			originalRange;
 	NSRange			destinationRange;
-	NSString*		newText;
-	NSString*		oldText;
+	NSString*		theNewText;
+	NSString*		theOldText;
 	BOOL			apply;		// YES if we should apply this change, NO if we should leave the original text in the output.
 }
 
 @property (assign) UKDiffOperation	operation;
 @property (assign) NSRange			originalRange;
 @property (assign) NSRange			destinationRange;
-@property (retain) NSString*		newText;
-@property (retain) NSString*		oldText;
+@property (retain) NSString*		theNewText;
+@property (retain) NSString*		theOldText;
 @property (assign) BOOL				apply;
 
 @end

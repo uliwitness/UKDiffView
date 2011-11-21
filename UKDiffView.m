@@ -538,8 +538,8 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 		
 		if( recreate )
 		{
-			cached = [UKCachedDiffEntry cachedEntryWithLeftString: [currDiff oldText]
-												rightString: [currDiff newText]
+			cached = [UKCachedDiffEntry cachedEntryWithLeftString: [currDiff theOldText]
+												rightString: [currDiff theNewText]
 												attributes: attrs
 												applyFlag: [currDiff apply]];
 			[cached setCurrOp: [currDiff operation]];

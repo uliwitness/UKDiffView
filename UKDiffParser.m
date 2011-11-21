@@ -145,7 +145,7 @@
 			[currDiff setOperation: separators[separatorIdx]];
 			[currDiff setOriginalRange: originalRange];
 			[currDiff setDestinationRange: destRange];
-			[currDiff setNewText: newString];
+			[currDiff setTheNewText: newString];
 			[differences addObject: currDiff];
 		}
 	}
@@ -375,8 +375,8 @@
 				[currDiff setOperation: op];
 				[currDiff setOriginalRange: leftRange];
 				[currDiff setDestinationRange: rightRange];
-				[currDiff setNewText: rightString];
-				[currDiff setOldText: leftString];
+				[currDiff setTheNewText: rightString];
+				[currDiff setTheOldText: leftString];
 				[differences addObject: currDiff];
 				
 				UKLog( @"%@", currDiff );
@@ -446,7 +446,7 @@
 	{
 		UKDiffOperation	operation = [currDiff operation];
 		NSRange			originalRange = [currDiff originalRange];
-		NSString*		newString = [currDiff newText];
+		NSString*		newString = [currDiff theNewText];
 		
 		if( operation == UKDiffOperationUnchanged )	// Ignore those, we do that ourselves.
 			continue;
@@ -521,14 +521,14 @@
 			
 			[newDiff setOperation: UKDiffOperationUnchanged];
 			[newDiff setOriginalRange: NSMakeRange(prevOriginalLine,currOriginalLine -prevOriginalLine)];
-			[newDiff setOldText: currStr];
-			[newDiff setNewText: currStr];
+			[newDiff setTheOldText: currStr];
+			[newDiff setTheNewText: currStr];
 			[newDifferences addObject: newDiff];
 		}
 		
 		// Now create an entry for the current change:
 		if( operation == UKDiffOperationAdd )
-			[newDifferences addObject: currDiff];	// Add object is already done, doesn't need an 'oldText'.
+			[newDifferences addObject: currDiff];	// Add object is already done, doesn't need an 'theOldText'.
 		else	// Change or delete:
 		{
 			// Capture old text and add it to this diff item:
@@ -539,7 +539,7 @@
 				[replicatedString appendString: theLine];
 			}
 			
-			[currDiff setOldText: replicatedString];
+			[currDiff setTheOldText: replicatedString];
 			[newDifferences addObject: currDiff];
 		}
 	}
@@ -555,8 +555,8 @@
 		
 		[newDiff setOperation: UKDiffOperationUnchanged];
 		[newDiff setOriginalRange: NSMakeRange(prevOriginalLine,currOriginalLine -prevOriginalLine)];
-		[newDiff setOldText: finalStr];
-		[newDiff setNewText: finalStr];
+		[newDiff setTheOldText: finalStr];
+		[newDiff setTheNewText: finalStr];
 		[newDifferences addObject: newDiff];
 	}
 	
@@ -571,7 +571,7 @@
 	
 	for( UKDiffEntry* currDiff in differences )
 	{
-		NSString*	currStr = [currDiff oldText];
+		NSString*	currStr = [currDiff theOldText];
 		if( currStr )
 			[outStr appendString: currStr];
 	}
@@ -586,7 +586,7 @@
 	
 	for( UKDiffEntry* currDiff in differences )
 	{
-		NSString*	currStr = [currDiff newText];
+		NSString*	currStr = [currDiff theNewText];
 		if( currStr )
 			[outStr appendString: currStr];
 	}
@@ -601,7 +601,7 @@
 	
 	for( UKDiffEntry* currDiff in differences )
 	{
-		NSString*	currStr = [currDiff apply] ? [currDiff newText] : [currDiff oldText];
+		NSString*	currStr = [currDiff apply] ? [currDiff theNewText] : [currDiff theOldText];
 		if( currStr )
 			[outStr appendString: currStr];
 	}
@@ -632,8 +632,8 @@
 @synthesize	operation;
 @synthesize	originalRange;
 @synthesize	destinationRange;
-@synthesize	newText;
-@synthesize	oldText;
+@synthesize	theNewText;
+@synthesize	theOldText;
 @synthesize apply;
 
 -(id)	init
