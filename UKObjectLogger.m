@@ -27,12 +27,23 @@
 
 #import "UKObjectLogger.h"
 
+#import "JRSwizzle.h"
 
 @implementation UKObjectLogger
 
-+(void)	installUKObjectLogger
++(void)installUKObjectLogger
 {
-	[[self class] poseAsClass: [NSObject class]];
+	NSError *error = nil;
+	
+	[NSObject jr_swizzleMethod:@selector(init) withMethod:@selector(init) error:&error];
+	if (error != nil) {
+		NSLog(@"installUKObjectLogger swizzle init error: %@", error);
+	}
+	
+	[NSObject jr_swizzleMethod:@selector(dealloc) withMethod:@selector(dealloc) error:&error];
+	if (error != nil) {
+		NSLog(@"installUKObjectLogger swizzle init error: %@", error);
+	}
 }
 
 -(id)	init
