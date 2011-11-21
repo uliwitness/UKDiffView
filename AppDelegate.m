@@ -45,8 +45,16 @@
 - (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename
 {
 #pragma unused(sender)
+	NSError *error;
+	NSStringEncoding enc;
+	
 	self.currPath = [[filename stringByDeletingPathExtension] stringByAppendingPathExtension: @"txt"];
-	NSString*	stringOne = [NSString stringWithContentsOfFile: self.currPath];
+	NSString*	stringOne = [NSString stringWithContentsOfFile: self.currPath usedEncoding: &enc error: &error];
+	if (!stringOne)
+	{
+		NSLog(@"%@", error);
+	}	
+	
 	NSString*	diffPath = [[filename stringByDeletingPathExtension] stringByAppendingPathExtension: @"udiff"];
 	BOOL		uniDiff = YES;
 	if( ![[NSFileManager defaultManager] fileExistsAtPath: diffPath] )
@@ -54,7 +62,11 @@
 		diffPath = [[filename stringByDeletingPathExtension] stringByAppendingPathExtension: @"diff"];
 		uniDiff = NO;
 	}
-	NSString*	differences = [NSString stringWithContentsOfFile: diffPath];
+	NSString*	differences = [NSString stringWithContentsOfFile: diffPath usedEncoding: &enc error: &error];
+	if (!differences)
+	{
+		NSLog(@"%@", error);
+	}	
 	
 	UKDiffParser*	dp = nil;
 	if( uniDiff )
