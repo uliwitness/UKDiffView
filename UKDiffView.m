@@ -33,6 +33,8 @@
 #import "UKDiffParser.h"
 #import "UKHelperMacros.h"
 
+#import "NSView+ScrollToRect.h"
+
 
 // -----------------------------------------------------------------------------
 //	Constants:
@@ -53,7 +55,6 @@
 
 @implementation UKCachedDiffEntry
 
-@synthesize leftDrawBox;
 @synthesize rightDrawBox;
 @synthesize leftTextStorage;
 @synthesize rightTextStorage;
@@ -110,6 +111,10 @@
 static CGFloat sOneLineHeight = -1;
 
 
+-(NSRect)leftDrawBox {
+    return leftDrawBox;
+}
+
 -(void)	setLeftDrawBox: (NSRect)box
 {
 	if( sOneLineHeight < 0 )
@@ -124,11 +129,15 @@ static CGFloat sOneLineHeight = -1;
 	NSLayoutManager*	layoutManager = [[leftTextStorage layoutManagers] objectAtIndex: 0];
 	NSTextContainer*	textContainer = [[layoutManager textContainers] objectAtIndex: 0];
 	[textContainer setContainerSize: NSMakeSize(box.size.width, FLT_MAX)];
-	(NSRange) [layoutManager glyphRangeForTextContainer: textContainer]; // Cause re-layout.
+	/*(NSRange) */[layoutManager glyphRangeForTextContainer: textContainer]; // Cause re-layout.
 	NSRect	textRect = [layoutManager usedRectForTextContainer: textContainer];
 	leftDrawBox.size.height = textRect.size.height -(endsInLineBreak ? sOneLineHeight : 0);
 }
 
+
+-(NSRect)rightDrawBox {
+    return rightDrawBox;
+}
 
 -(void)	setRightDrawBox: (NSRect)box
 {
@@ -144,7 +153,7 @@ static CGFloat sOneLineHeight = -1;
 	NSLayoutManager*	layoutManager = [[rightTextStorage layoutManagers] objectAtIndex: 0];
 	NSTextContainer*	textContainer = [[layoutManager textContainers] objectAtIndex: 0];
 	[textContainer setContainerSize: NSMakeSize(box.size.width, FLT_MAX)];
-	(NSRange) [layoutManager glyphRangeForTextContainer: textContainer]; // Cause re-layout.
+	/*(NSRange) */[layoutManager glyphRangeForTextContainer: textContainer]; // Cause re-layout.
 	NSRect	textRect = [layoutManager usedRectForTextContainer: textContainer];
 	rightDrawBox.size.height = textRect.size.height -(endsInLineBreak ? sOneLineHeight : 0);
 }
@@ -315,7 +324,6 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 
 @implementation UKDiffView
 
-@synthesize diffParser;
 @synthesize cachedDrawings;
 @synthesize selectedRow;
 
@@ -426,6 +434,8 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 }
 
 
+#define POSITION_RELATIVE_TO_WINDOW_HEIGHT	0.1f
+
 -(void)	moveUp: (id)sender
 {
 #pragma unused(sender)
@@ -439,8 +449,7 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 		{
 			selectedRow = x;
 			[self setNeedsDisplay: YES];
-			[self scrollRectToVisible: [currEntry leftDrawBox]];
-			[self scrollRectToVisible: [currEntry rightDrawBox]];
+			[self scrollRectToTop:NSUnionRect([currEntry leftDrawBox], [currEntry rightDrawBox]) withOffset:POSITION_RELATIVE_TO_WINDOW_HEIGHT];
 			break;
 		}
 	}
@@ -461,13 +470,14 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 		{
 			selectedRow = x;
 			[self setNeedsDisplay: YES];
-			[self scrollRectToVisible: [currEntry leftDrawBox]];
-			[self scrollRectToVisible: [currEntry rightDrawBox]];
+			
+			[self scrollRectToTop:NSUnionRect([currEntry leftDrawBox], [currEntry rightDrawBox]) withOffset:POSITION_RELATIVE_TO_WINDOW_HEIGHT];
 			break;
 		}
 	}
 }
 
+#undef POSITION_RELATIVE_TO_WINDOW_HEIGHT
 
 -(BOOL)	acceptsFirstResponder
 {
@@ -486,6 +496,10 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 	return YES;
 }
 
+
+- (UKDiffParser *)diffParser {
+    return [[diffParser retain] autorelease];
+}
 
 -(void)	setDiffParser: (UKDiffParser*)dp
 {
@@ -528,8 +542,8 @@ NSPoint	UKOffsetPoint( NSPoint pos, CGFloat x, CGFloat y )
 		
 		if( recreate )
 		{
-			cached = [UKCachedDiffEntry cachedEntryWithLeftString: [currDiff oldText]
-												rightString: [currDiff newText]
+			cached = [UKCachedDiffEntry cachedEntryWithLeftString: [currDiff theOldText]
+												rightString: [currDiff theNewText]
 												attributes: attrs
 												applyFlag: [currDiff apply]];
 			[cached setCurrOp: [currDiff operation]];

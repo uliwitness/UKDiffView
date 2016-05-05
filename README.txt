@@ -29,6 +29,8 @@ IMPORTANT
 
 This project uses the UliKit. You *must* check out UliKit into a folder next to the UKDiffView folder to have this project compile.
 
+Don’t forget to `git submodule update`.
+
 
 LICENSE
 -------
